@@ -1,0 +1,26 @@
+# 基于httprunner 2.5.7版本
+config:
+  name: httprunner pactverify demo
+  base_url: http://localhost:9999
+  verify: False
+
+teststeps:
+  - name: get_auth
+    variables:
+      name: lilei
+      age: 12
+    request:
+      method: GET
+      url: /api/v1/auth
+      params:
+        name: $name
+        age: $age
+    teardown_hooks:
+      # teardown处理，将verify_result和verify_info写入response对象
+      - ${pactverify($response,api_v1_auth_get_pact)}
+    validate:
+      - eq: [status_code,200]
+      # 判断verify_result是否为true
+      - eq: [verify_result,true]
+      # 判断len(verify_info) >= 0，为了输出verify_info到测试报告
+      - len_ge: [verify_info,0]
